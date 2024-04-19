@@ -1,4 +1,4 @@
-# FSRT: Facial Scene Representation Transformer for Face Reenactment from Factorized Appearance, Head-pose, and Facial Expression Features (CVPR 2024)
+# FSRT: Facial Scene Representation Transformer for Face Reenactment (CVPR 2024)
 
 Official GitHub repository for [FSRT: Facial Scene Representation Transformer for Face Reenactment from Factorized Appearance, Head-pose, and Facial Expression Features](https://andrerochow.github.io/fsrt) (accepted to CVPR 2024) by Andre Rochow, Max Schwarz, and [Sven Behnke](https://www.ais.uni-bonn.de/behnke/). <br>
 
