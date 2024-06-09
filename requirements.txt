@@ -1,0 +1,10 @@
+einops>=0.4.1
+wandb
+pyyaml
+matplotlib
+tqdm
+scikit-image
+scipy
+numpy
+ffmpeg-python
+imageio-ffmpeg
