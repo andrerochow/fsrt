@@ -164,7 +164,7 @@ if __name__ == "__main__":
     parser.add_argument('--source_idx', nargs='+', help='Indices of the source images in the source video (e.g. 0 10 -1 for idx 0, idx 10, idx -1)', default='0')
     parser.add_argument("--cpu", dest="cpu", action="store_true", help="cpu mode (only for FaceAlignment keypoint extraction).")
     parser.add_argument("--audio", dest="audio", action="store_true", help="copy audio to output from the driving video" )
-    parser.add_argument("--max_num_pixels", default=65536, help="number of parallel processed pixels. Reduce this value if you run out of GPU memory!")
+    parser.add_argument("--max_num_pixels", default=65536, help="Number of parallel processed pixels. Reduce this value if you run out of GPU memory!")
 
     parser.set_defaults(relative=False)
     parser.set_defaults(adapt_scale=False)
@@ -198,7 +198,7 @@ if __name__ == "__main__":
         cfg = yaml.load(f, Loader=yaml.CLoader)
         
     kp_detector = KPDetector().cuda()
-    kp_detector.load_state_dict(torch.load('./weights/kp_detector.pt'))
+    kp_detector.load_state_dict(torch.load('./fsrt_checkpoints/kp_detector.pt'))
     expression_encoder = ExpressionEncoder(expression_size=cfg['model']['expression_size'], in_channels=kp_detector.predictor.out_filters) 
         
     model = FSRT(cfg['model'],expression_encoder=expression_encoder).cuda()
