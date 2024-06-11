@@ -1,0 +1,17 @@
+data:
+  num_src: 2 #Model is trained with num_src source images
+
+model:
+  encoder_kwargs:
+    pix_octaves: 16
+    pix_start_octave: -1 
+    kp_octaves: 4
+    kp_start_octave: -1  
+    encode_with_expression: True #If True, the expression vector is used to encode the source image.
+  decoder_kwargs:
+    pix_start_octave: -1
+    pix_octaves: 16
+    kp_octaves: 4
+    kp_start_octave: -1
+  small_decoder: False
+  expression_size: 256
