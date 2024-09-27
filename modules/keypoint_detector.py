@@ -2,52 +2,7 @@ from torch import nn
 import torch
 import torch.nn.functional as F
 from torch.nn import BatchNorm2d 
-
-
-def make_coordinate_grid(spatial_size, type):
-    """
-    Create a meshgrid [-1,1] x [-1,1] of given spatial_size.
-    """
-    h, w = spatial_size
-    x = torch.arange(w).type(type)
-    y = torch.arange(h).type(type)
-
-    x = (2 * (x / (w - 1)) - 1)
-    y = (2 * (y / (h - 1)) - 1)
-
-    yy = y.view(-1, 1).repeat(1, w)
-    xx = x.view(1, -1).repeat(h, 1)
-
-    meshed = torch.cat([xx.unsqueeze_(2), yy.unsqueeze_(2)], 2)
-
-    return meshed
-
-
-
-def kp2gaussian(kp, spatial_size, kp_variance):
-    """
-    Transform a keypoint into gaussian like representation
-    """
-    mean = kp
-
-    coordinate_grid = make_coordinate_grid(spatial_size, mean.type())
-    number_of_leading_dimensions = len(mean.shape) - 1
-    shape = (1,) * number_of_leading_dimensions + coordinate_grid.shape
-    coordinate_grid = coordinate_grid.view(*shape)
-    repeats = mean.shape[:number_of_leading_dimensions] + (1, 1, 1)
-    coordinate_grid = coordinate_grid.repeat(*repeats)
-
-    # Preprocess kp shape
-    shape = mean.shape[:number_of_leading_dimensions] + (1, 1, 2)
-    mean = mean.view(*shape)
-
-    mean_sub = (coordinate_grid - mean)
-
-    out = torch.exp(-0.5 * (mean_sub ** 2).sum(-1) / kp_variance)
-
-    return out
-
-
+from modules.util import AntiAliasInterpolation2d, make_coordinate_grid
 
 class UpBlock2d(nn.Module):
     """
@@ -154,56 +109,6 @@ class Hourglass(nn.Module):
 
     def forward(self, x):
         return self.decoder(self.encoder(x))
-
-
-    
-class AntiAliasInterpolation2d(nn.Module):
-    """
-    Band-limited downsampling, for better preservation of the input signal.
-    """
-    def __init__(self, channels, scale):
-        super(AntiAliasInterpolation2d, self).__init__()
-        sigma = (1 / scale - 1) / 2
-        kernel_size = 2 * round(sigma * 4) + 1
-        self.ka = kernel_size // 2
-        self.kb = self.ka - 1 if kernel_size % 2 == 0 else self.ka
-
-        kernel_size = [kernel_size, kernel_size]
-        sigma = [sigma, sigma]
-        # The gaussian kernel is the product of the
-        # gaussian function of each dimension.
-        kernel = 1
-        meshgrids = torch.meshgrid(
-            [
-                torch.arange(size, dtype=torch.float32)
-                for size in kernel_size
-                ]
-        )
-        for size, std, mgrid in zip(kernel_size, sigma, meshgrids):
-            mean = (size - 1) / 2
-            kernel *= torch.exp(-(mgrid - mean) ** 2 / (2 * std ** 2))
-
-        # Make sure sum of values in gaussian kernel equals 1.
-        kernel = kernel / torch.sum(kernel)
-        # Reshape to depthwise convolutional weight
-        kernel = kernel.view(1, 1, *kernel.size())
-        kernel = kernel.repeat(channels, *[1] * (kernel.dim() - 1))
-
-        self.register_buffer('weight', kernel)
-        self.groups = channels
-        self.scale = scale
-        inv_scale = 1 / scale
-        self.int_inv_scale = int(inv_scale)
-
-    def forward(self, input):
-        if self.scale == 1.0:
-            return input
-
-        out = F.pad(input, (self.ka, self.kb, self.ka, self.kb))
-        out = F.conv2d(out, weight=self.weight, groups=self.groups)
-        out = out[:, :, ::self.int_inv_scale, ::self.int_inv_scale]
-
-        return out
 
 
 

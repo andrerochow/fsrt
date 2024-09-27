@@ -1,5 +1,20 @@
 data:
+  data_path: path/to/dataset/
+  kp_path: path/to/keypoints/
+  dataset: vox
   num_src: 1 #Model is trained with num_src source images
+  num_pixels_phase1: 4096
+  num_pixels: 16384
+  image_subsampling: True # Instead of sampling random pixels. Only implemented for square images!
+  simulate_out_of_frame_motion: True  # Keypoints outside the image can be encoded. REQUIRES negative start_octave!
+  augmentation_params:
+    flip_param:
+      horizontal_flip: True
+    jitter_param:
+      brightness: 0.1
+      contrast: 0.1
+      saturation: 0.1
+      hue: 0.1
 
 model:
   encoder_kwargs:
@@ -9,9 +24,49 @@ model:
     kp_start_octave: -1  
     encode_with_expression: True #If True, the expression vector is used to encode the source image.
   decoder_kwargs:
-    pix_start_octave: -1
     pix_octaves: 16
+    pix_start_octave: -1
     kp_octaves: 4
     kp_start_octave: -1
   small_decoder: False
   expression_size: 256
+
+discriminator:
+  use_disc: True
+  scales: [1]
+  disc_kwargs:
+    num_channels: 3
+    block_expansion: 64
+    num_blocks: 4
+    max_features: 512
+    sn: False
+    use_kp: True
+    num_kp: 10
+    kp_variance: 0.01
+
+training:
+  iters_in_phase1: 200000 #Number of iterations in training phase 1
+  iters_in_phase2: 300000 #Number of iterations in training phase 2
+  max_it: 4000000
+  decay_it: 4000000
+  lr_warmup: 2500
+  num_workers: 20
+  batch_size: 24
+  model_selection_metric: psnr
+  model_selection_mode: maximize
+  print_every: 10
+  visualize_every: 5000
+  validate_every: 5000
+  checkpoint_every: 1000
+  backup_every: 5000
+  disc_warmup_iters: 500
+  scales: [1]
+  mse_loss_weight: 1
+  perceptual_loss_weight: [0.01,0.01,0.01,0.01,0.01]
+  discriminator_gan_loss_weight: 0.001
+  generator_gan_loss_weight: 0.001
+  generator_gan_feature_matching: [0.01,0.01,0.01,0.01]
+  statistical_regularization: True
+  variance_loss_weight: 0.2
+  covariance_loss_weight: 1
+  invariance_loss_weight: 1
