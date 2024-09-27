@@ -160,14 +160,14 @@ class VoxDataset(Dataset):
             #We crop the Image to obtain driving keypoints outside the image (see Sec. 7.2. -> ¶ "Visualizing Out-of-frame Motion" in Supplementary Material). 
             crop_image = (torch.rand(1) < 0.5)
             
-            # The follolwing block can be removed as it is unnecessary.
+            # The follolwing block was removed as it is unnecessary. However, we utilized it for the training of our model ablations in the paper.
             # BEGIN Block
-            if video_array[0].shape[0] != self.frame_shape[0]:
-                if video_array[0].shape[0] < 1.25*self.frame_shape[0] or not crop_image:
-                    video_array = torch.nn.functional.interpolate(torch.from_numpy(video_array.transpose(0,3,1,2)),(self.frame_shape[0],self.frame_shape[1]),mode='bilinear').numpy().transpose(0,2,3,1)
-                else: #Resize the video to twice the output resulution, since we will crop it later
-                    video_array = torch.nn.functional.interpolate(torch.from_numpy(video_array.transpose(0,3,1,2)),(2*self.frame_shape[0],2*self.frame_shape[1]),mode='bilinear').numpy().transpose(0,2,3,1)
-                video_array = [video_array[i] for i in range(video_array.shape[0])]
+            #if video_array[0].shape[0] != self.frame_shape[0]:
+                #if video_array[0].shape[0] < 1.25*self.frame_shape[0] or not crop_image:
+                    #video_array = torch.nn.functional.interpolate(torch.from_numpy(video_array.transpose(0,3,1,2)),(self.frame_shape[0],self.frame_shape[1]),mode='bilinear').numpy().transpose(0,2,3,1)
+                #else: #Resize the video to twice the output resulution, since we will crop it later
+                    #video_array = torch.nn.functional.interpolate(torch.from_numpy(video_array.transpose(0,3,1,2)),(2*self.frame_shape[0],2*self.frame_shape[1]),mode='bilinear').numpy().transpose(0,2,3,1)
+                #video_array = [video_array[i] for i in range(video_array.shape[0])]
             # END Block
             
             flipped = False
